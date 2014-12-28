@@ -1,0 +1,19 @@
+.library-images ul li{
+	list-style: none;
+	float:left;
+}
+
+.library-images ul li a{
+	float:left;
+	position:relative;
+	margin-right: 10px;
+}
+
+.library-images ul li .btn{
+	position:absolute;
+}
+
+.library-images ul li .btn.remove{
+	top: 0;
+	right: 0;
+}

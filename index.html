@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+	<link rel="stylesheet" href="style.css">
+
+	<style>
+		.collection img{
+			width: 50px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<h1>Media Manager</h1>
+
+			<!-- nav tabs -->
+			<ul class="nav nav-tabs" id="myTabs">
+				<li class="active"><a href="#upload" data-toggle="tab">Home</a></li>
+				<li><a href="#lib" data-toggle="tab">Profile</a></li>
+			</ul>
+
+			<div class="tab-content">
+				<!-- .fade.in for first tab animation -->
+				<div class="tab-pane active fade in" id="upload">
+					<input type="file" class="form-control input-sm" name="files" multiple id="img-files">
+					<hr>
+					<div class="images-area">
+						<button class="btn btn-sm btn-primary uploadall">Upload All</button>
+						<button class="btn btn-sm btn-danger cancelall">Cancel All</button>
+						<div class="clearfix"></div>
+						<div class="collection"></div>
+					</div><!-- end-->
+				</div>
+
+				<div class="tab-pane fade" id="lib">
+					<div class="form-inline">
+						<form action="#">
+							<div class="form-group">
+								<label for="">Search</label>
+								<input type="text" class="form-control input-sm" name="">
+							</div>
+						</form>
+					</div>
+
+					<div class="library-images">
+						<ul>
+							<li>
+								<a href="#">
+									<img src="http://lorempixel.com/100/100" alt="">
+									<button class="btn btn-xs btn-danger remove">
+										<span class="glyphicon glyphicon-remove-sign"></span>
+									</button>
+								</a>
+								<h5>Image Title</h5>
+							</li>
+							<li>
+								<a href="#">
+									<img src="http://lorempixel.com/100/100" alt="">
+									<button class="btn btn-xs btn-danger remove">
+										<span class="glyphicon glyphicon-remove-sign"></span>
+									</button>
+								</a>
+								<h5>Image Title</h5>
+							</li>
+							<li>
+								<a href="#">
+									<img src="http://lorempixel.com/100/100" alt="">
+									<button class="btn btn-xs btn-danger remove">
+										<span class="glyphicon glyphicon-remove-sign"></span>
+									</button>
+								</a>
+								<h5>Image Title</h5>
+							</li>
+						</ul>
+
+						<div class="clearfix"></div>
+
+						<nav>
+						  <ul class="pagination">
+						    <li>
+						      <a href="#" aria-label="Previous">
+						        <span>&laquo;</span>
+						      </a>
+						    </li>
+						    <li><a href="#">1</a></li>
+						    <li><a href="#">2</a></li>
+						    <li><a href="#">3</a></li>
+						    <li><a href="#">4</a></li>
+						    <li><a href="#">5</a></li>
+						    <li>
+						      <a href="#" aria-label="Next">
+						        <span>&raquo;</span>
+						      </a>
+						    </li>
+						  </ul>
+						</nav>
+					</div><!-- end .library-images -->
+				</div>
+			</div>
+		</div><!-- end .row -->
+	</div><!-- end .container -->
+
+	<script>
+
+		var collection = $('.collection');
+		var imagesArray = [];
+		var template;
+
+		/*==================== FILE INPUT CHANGES =========================*/
+		$('#img-files').on('change',function(e){
+			e.preventDefault();
+			var files = e.target.files;
+			$.each(files, function(i, file){
+				var reader = new FileReader();
+				var img;
+				reader.readAsDataURL(file);
+				reader.onload = function(e){
+					// img = new Image();
+					// img.src = e.target.result;
+					template = '<div class="uploadcontent">'+
+						'<form action="">'+
+						'<img src="'+e.target.result+'" /><input type="text" name="title" value="'+file.name.cleanText()+'"/> <button class="btn btn-sm upload"><span class="glyphicon glyphicon-upload-lorem"></span></button><button class="remove">remove</button>'+
+						'</div>'+
+						'<form action="">';
+					collection.append(template);
+				};
+
+				var imgData = {
+					file:file
+				};
+				imagesArray.push(imgData);
+			});
+
+			console.log(imagesArray);
+		});
+
+		/*==================== REMOVE THE ITEM FROM THE UPLOAD =========================*/
+		collection.on('click','.remove',function(e){
+			var parent = $(this).parents('.uploadcontent');
+			var index = parent.index();
+
+			//remove DOM
+			parent.remove();
+			//remove from array
+			imagesArray.splice(index,1);
+
+		});
+
+		/*==================== SUBMIT FORM AJAX =========================*/
+		collection.on('submit','form',function(e){
+			e.preventDefault();
+
+			var index = $(this).parents('.uploadcontent').index();
+			var imgData = imagesArray[index];
+
+			var formData = new FormData($(this)[0]);
+			formData.append('image', imgData.file);
+
+			var request = new XMLHttpRequest();
+			request.open('post', 'server.php', true);
+			request.send(formData);
+		});
+
+		/*==================== STRING CLEAN UP AND REMOVE EXTENSION =========================*/
+		String.prototype.cleanText = function(){
+			return this.replace(/\.[^/.]+$/,'')
+						.replace(/-|_|\./g,' ')
+						.replace(/\s+/g,' ');
+		}
+
+		//ALL FORM UPLOADER
+		$('.uploadall').click(function(){
+			collection.find('form').submit();
+		});
+	</script>
+</body>
+</html>
